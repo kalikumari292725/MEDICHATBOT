@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediChatbot</title>
+    <style>
+        body { 
+            font-family: 'Arial', sans-serif; 
+            margin: 0; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            background: linear-gradient(135deg, #e8f5e9, #bbdefb); 
+            color: #2c3e50;
+            height: 100vh;
+            overflow: hidden;
+        }
+        h1 {
+            text-align: center;
+            color: #2e7d32;
+            margin: 10px 0;
+        }
+        #mainContainer {
+            display: flex;
+            flex: 1;
+            width: 95%;
+            max-width: 1200px;
+            gap: 20px;
+            margin: 10px 0;
+        }
+        #chatContainer {
+            flex: 3;
+            display: flex;
+            flex-direction: column;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            padding: 10px;
+        }
+        #chatbox { 
+            flex: 1; 
+            overflow-y: auto; 
+            scroll-behavior: smooth; /* Smooth scrolling */
+            background-color: #f9f9f9;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: inset 0 1px 5px rgba(0, 0, 0, 0.1);
+            max-height: 400px; /* Optional: Ensures proper scroll area */
+        }
+        .message { 
+            margin: 5px 0; 
+            line-height: 1.5;
+        }
+        .user { 
+            color: #2c3e50; 
+            font-weight: bold; 
+        }
+        .bot { 
+            color: #325132; 
+            font-weight: bold; 
+        }
+        #userInputContainer {
+            display: flex;
+            margin-top: 10px;
+            width: 100%;
+            gap: 10px;
+            bottom: 0;
+            background: white;
+            padding: 10px 0;
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+        }
+        #userInput { 
+            flex: 3;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+            outline: none;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        button { 
+            flex: 1;
+            padding: 10px; 
+            border: none; 
+            border-radius: 5px; 
+            background-color: #2e7d32; 
+            color: white; 
+            cursor: pointer; 
+            font-size: 16px; 
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        button:hover { 
+            background-color: #1b5e20; 
+        }
+    </style>
+</head>
+<body>
+    <h1>MediChatbot</h1>
+    <div id="mainContainer">
+        <!-- Chat Container -->
+        <div id="chatContainer">
+            <div id="chatbox"></div>
+            <div id="userInputContainer">
+                <input type="text" id="userInput" placeholder="Type your message...">
+                <button onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const chatbox = document.getElementById("chatbox");
+
+        function sendMessage() {
+            const inputField = document.getElementById("userInput");
+            const message = inputField.value.trim();
+
+            if (!message) return;
+
+            // Display user message
+            addMessage("You", message, "user");
+            inputField.value = "";
+
+            // Scroll to bottom after user message
+            chatbox.scrollTop = chatbox.scrollHeight;
+
+            // Simulate server fetch and bot reply
+            setTimeout(() => {
+                fetchBotResponse(message);
+            }, 500);
+        }
+
+        function fetchBotResponse(userMessage) {
+            fetch("/get", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: "msg=" + encodeURIComponent(userMessage)
+            })
+            .then(response => response.text())
+            .then(botResponse => {
+                addMessage("Bot", botResponse, "bot");
+                // Scroll to bottom after bot response
+                chatbox.scrollTop = chatbox.scrollHeight;
+            })
+            .catch(() => {
+                addMessage("Bot", "Error: Unable to fetch response.", "bot");
+                chatbox.scrollTop = chatbox.scrollHeight;
+            });
+        }
+
+        function addMessage(sender, text, className) {
+            const messageDiv = document.createElement("div");
+            messageDiv.className = `message ${className}`;
+            messageDiv.innerHTML = `${sender}: ${text}`;
+            chatbox.appendChild(messageDiv);
+        }
+
+        // Enter key event listener
+        document.getElementById("userInput").addEventListener("keypress", function (event) {
+            if (event.key === "Enter") {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>
